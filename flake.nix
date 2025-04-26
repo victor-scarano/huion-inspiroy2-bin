@@ -18,29 +18,49 @@
 					hash = "sha256-cGa3XGE6q7+M8aV+pUkQpPYiRd24mGqgGu8wDgst6H0=";
 				};
 
+				dontWrapQtApps = true;
+
 				nativeBuildInputs = [
 					pkgs.autoPatchelfHook
 					pkgs.makeWrapper
 				];
 
 				buildInputs = with pkgs; [
-					xdotool
-					xorg.libX11
-					stdenv.cc.cc.lib
-					libusb1
-					libz
-					freetype
-					fontconfig
-					libGL
-					e2fsprogs # for libcom_err.so.2
-					libgpg-error
+						stdenv.cc.cc.lib # libgcc_s.so.1 libstdc++.so.6
+						xorg.libX11 # libX11.so.6
+						xorg.libXrandr # libXrandr.so.2
+						xorg.libXtst # libXtst.so.6
+						xdotool # libXrandr.so.2
+						libsForQt5.qt5.qtquickcontrols # libQt5Quick.so.5
+						libsForQt5.qt5.qtx11extras # libQt5X11Extras.so.5
+						e2fsprogs # libcom_err.so.2
+						libusb1 # libusb-1.0.so.0
+						libgpg-error # libgpg-error.so.0
+
+						# libsForQt5.qt5.qtbase
+
+						# libQt5Core.so.5
+						# libQt5DBus.so.5
+						# libQt5Gui.so.5
+						# libQt5Qml.so.5
+						# libQt5Quick.so.5
+						# libQt5Widgets.so.5
+						# libQt5X11Extras.so.5
+
+						# libz
+						# freetype
+						# fontconfig
+						# libGL
 				];
 
 				installPhase = ''
-					mkdir -p $out/lib/udev/rules.d
-					cp huiontablet/res/rule/20-huion.rules $out/lib/udev/rules.d
-
+					mkdir -p $out/lib/huiontablet
 					cp -r huiontablet $out/lib
+					# cp -r * $out/lib/huiontablet
+					# cp -r huiontablet $out
+
+					mkdir -p $out/share/udev/rules.d
+					cp huiontablet/res/rule/20-huion.rules $out/share/udev/rules.d
 
 					mkdir -p $out/share/applications
 					cp xdg/autostart/huiontablet.desktop $out/share/applications
@@ -48,15 +68,14 @@
 					mkdir -p $out/share/icons
 					cp icon/huiontablet.png $out/share/icons
 
-					mkdir -p $out/bin
+					autoPatchelf huiontablet
+					# chmod +x huiontablet/huionCore
 
-					makeWrapper $out/lib/huiontablet/huionCore \
-						$out/bin/huionCore \
+					mkdir -p $out/bin
+					makeWrapper $out/lib/huiontablet/huionCore $out/bin/huionCore \
 						--set-default LD_LIBRARY_PATH $out/lib/huiontablet/libs \
-						--add-flags "-d" \
-						--chdir /tmp
-						# --set HOME "/tmp"
-						# --set LD_LIBRARY_PATH $out/lib/huiontablet/libs \
+						--add-flags -d \
+						--set HOME /tmp
 				'';
 
 				meta = {

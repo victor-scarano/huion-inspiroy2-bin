@@ -86,6 +86,11 @@
 					platforms = pkgs.lib.platforms.linux;
 				};
 			};
+
+		apps.x86_64-linux.huionCore = {
+			type = "app";
+			program = "${self.packages.x86_64-linux.default}/bin/huionCore";
+		};
 	};
 }
 
